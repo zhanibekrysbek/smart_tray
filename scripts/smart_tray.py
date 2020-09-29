@@ -11,26 +11,40 @@ class smart_tray(object):
 
 	def __init__(self):
 
-		rospy.set_param('RFT_COM_PORT', '/dev/ttyUSB0')
-		rospy.set_param('RFT_COM_PORT', '/dev/ttyUSB1')
+		# Set COM port params
+		rospy.set_param('RFT_COM_PORT', '/dev/ttyUSB3')
+		rospy.set_param('RFT_COM_PORT_2', '/dev/ttyUSB4')
+
+
 		# wait until services will be available in the network
 		rospy.wait_for_service('rft_serial_op_service')
-		rospy.wait_for_service('rft_serial_operation_2')
+		rospy.wait_for_service('rft_serial_op_service_2')
+
+		rospy.loginfo('Both RFT sensors are available!')
 
 		self.rft_srv_1 = rospy.ServiceProxy('rft_serial_op_service', rft_operation)
 		self.rft_srv_2 = rospy.ServiceProxy('rft_serial_op_service_2', rft_operation_2)
 
 	def start(self):
+		# Call Serial Number so it gets written in message frame.
+		res1 = self.rft_srv_1(2,0,0,0)
+		res2 = self.rft_srv_2(2,0,0,0)
+
+		if res1.result !=0 or res2.result !=0:
+			rospy.logwarn('Something wrong with Sensor Communication!')
+
+		rospy.sleep(0.5)
+
 		# trigger two nodes to broadcast data
 		self.rft_srv_1(11,0,0,0)
-		# self.talker2_serv('talk')
+		self.rft_srv_2(11,0,0,0)
 
 	# to be called on rospy shutdown
 	def stop(self):
 
 		rospy.loginfo('Ending the program!')
-		self.rft_srv_1(12,0,0,0)
-		# self.talker2_serv('stop')
+		# self.rft_srv_1(12,0,0,0)
+		# self.rft_srv_2(12,0,0,0)
 
 '''
 	This node is a central program that initiates sensor readings.
