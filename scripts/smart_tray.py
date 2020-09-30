@@ -12,8 +12,8 @@ class smart_tray(object):
 	def __init__(self):
 
 		# Set COM port params
-		rospy.set_param('RFT_COM_PORT', '/dev/ttyUSB2')
-		rospy.set_param('RFT_COM_PORT_2', '/dev/ttyUSB4')
+		rospy.set_param('RFT_COM_PORT', '/dev/ttyUSB0')
+		rospy.set_param('RFT_COM_PORT_2', '/dev/ttyUSB1')
 
 
 		# wait until services will be available in the network
