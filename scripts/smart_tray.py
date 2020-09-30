@@ -12,7 +12,7 @@ class smart_tray(object):
 	def __init__(self):
 
 		# Set COM port params
-		rospy.set_param('RFT_COM_PORT', '/dev/ttyUSB3')
+		rospy.set_param('RFT_COM_PORT', '/dev/ttyUSB2')
 		rospy.set_param('RFT_COM_PORT_2', '/dev/ttyUSB4')
 
 
@@ -34,6 +34,11 @@ class smart_tray(object):
 			rospy.logwarn('Something wrong with Sensor Communication!')
 
 		rospy.sleep(0.5)
+		# apply bias
+		res1 = self.rft_srv_1(17,1,0,0)
+		res2 = self.rft_srv_2(17,1,0,0)
+
+		rospy.sleep(0.5)
 
 		# trigger two nodes to broadcast data
 		self.rft_srv_1(11,0,0,0)
@@ -43,8 +48,8 @@ class smart_tray(object):
 	def stop(self):
 
 		rospy.loginfo('Ending the program!')
-		# self.rft_srv_1(12,0,0,0)
-		# self.rft_srv_2(12,0,0,0)
+		self.rft_srv_1(12,0,0,0)
+		self.rft_srv_2(12,0,0,0)
 
 '''
 	This node is a central program that initiates sensor readings.
