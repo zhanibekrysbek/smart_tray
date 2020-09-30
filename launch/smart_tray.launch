@@ -1,6 +1,6 @@
 <launch>
 
-	<node name="smart_tray" pkg="smart_tray" type="smart_tray.py" output="screen"/>
+	<node name="smart_tray" pkg="smart_tray" type="smart_tray_main.py" output="screen"/>
 
 	<node name="rft_sensor_serial" pkg="rft_sensor_serial" type="rft_sensor_serial" output="screen"/>
 
