@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
 '''
-    This is the code that is meant to execute in Raspberry Pi with LSM9DS1 IMU sensor from Adafruit.
-    It assumes that LSM9DS1_RaspberryPi_Library is installed at /home/pi directory.
+    This code is meant to be executed in Raspberry Pi with 
+    LSM9DS1 IMU sensor from Adafruit via I2C communication.
+    It assumes that LSM9DS1_RaspberryPi_Library is installed 
+    at "/home/pi" directory.
 '''
 
 import rospy
