@@ -31,7 +31,6 @@ class IMU_sensor():
 
         if req.req == 'start':
             self.state = True
-            self.t0 = rospy.get_time()
 
             rospy.loginfo('%s: broadcasting sensor readings!', self.name)
             return 'broadcasting sensor readings'

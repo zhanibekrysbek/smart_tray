@@ -23,7 +23,6 @@ class Camera(object):
 
         if req.req == 'start':
             self.state = True
-            self.t0 = rospy.get_time()
 
             rospy.loginfo('%s: Broadcasting images ', self.name)
             return 'Broadcasting images from Camera_1 '
