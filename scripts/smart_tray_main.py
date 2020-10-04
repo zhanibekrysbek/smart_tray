@@ -7,14 +7,22 @@ from datetime import datetime
 from std_msgs.msg import Float64, String
 from rft_sensor_serial.srv import rft_operation, rft_operation_2
 
+
 class smart_tray(object):
+	'''
+	Class handle of entire tray designed at Robotics Lab, UIC.
+	Mainly, it triggers resonsible services for each device including:
+		- 2 RFT60 sensors
+		- 2 Cameras
+		- 1 IMU
+		- Camera Pose Estimation Module
+	'''
 
 	def __init__(self):
 
 		# Set COM port params
 		rospy.set_param('RFT_COM_PORT', '/dev/ttyUSB0')
 		rospy.set_param('RFT_COM_PORT_2', '/dev/ttyUSB1')
-
 
 		# wait until services will be available in the network
 		rospy.wait_for_service('rft_serial_op_service')

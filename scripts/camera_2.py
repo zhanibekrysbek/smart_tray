@@ -9,25 +9,28 @@ from camera_publisher import Camera
 from smart_tray.srv import trigger_srv
 
 
+program_id = 2
+camera_id = 0
 
 def main():
 
-    
-    rospy.init_node('camera_2_image_acquisition')
+    rospy.init_node('camera_%d_image_acquisition', program_id)
     rospy.on_shutdown(stop)
-    rospy.loginfo(' Starting the camera_2 node! ')
+    rospy.loginfo(' Starting the camera_%d node! ', program_id)
 
-    cam = Camera('camera_2')
-    pub = rospy.Publisher('/camera_2', Image, queue_size=10)
-    rospy.Service('camera_2', trigger_srv, cam.service_callback )
+    cam = Camera('/camera_' + str(program_id). program_id=program_id)
 
-    cam.run(1, pub)
+    topic_name = '/camera_' + str(program_id)
+    pub = rospy.Publisher(topic_name, Image, queue_size=10)
+    rospy.Service('/camera_' + str(program_id), trigger_srv, cam.service_callback )
+
+    cam.run(camera_id, pub)
 
     rospy.spin()
+
 
 def stop():
     rospy.loginfo('Ending the program!')
 
 if __name__=="__main__":
     main()
-
