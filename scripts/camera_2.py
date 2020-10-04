@@ -14,15 +14,17 @@ camera_id = 0
 
 def main():
 
-    rospy.init_node('camera_%d_image_acquisition', program_id)
+    rospy.init_node('camera_{}_image_acquisition'.format(program_id))
     rospy.on_shutdown(stop)
     rospy.loginfo(' Starting the camera_%d node! ', program_id)
 
-    cam = Camera('/camera_' + str(program_id). program_id=program_id)
-
     topic_name = '/camera_' + str(program_id)
+
+    cam = Camera(name = topic_name, program_id=program_id)
+
+
     pub = rospy.Publisher(topic_name, Image, queue_size=10)
-    rospy.Service('/camera_' + str(program_id), trigger_srv, cam.service_callback )
+    rospy.Service(topic_name, trigger_srv, cam.service_callback )
 
     cam.run(camera_id, pub)
 
