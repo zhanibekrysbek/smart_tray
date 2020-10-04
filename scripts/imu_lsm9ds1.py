@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 
+'''
+    This is the code that is meant to execute in Raspberry Pi with LSM9DS1 IMU sensor from Adafruit.
+    It assumes that LSM9DS1_RaspberryPi_Library is installed at /home/pi directory.
+'''
+
 import rospy
 import sys
 import time
@@ -118,7 +123,7 @@ def main():
 
     sensor = IMU_sensor('imu_srv')
 
-    serv = rospy.Service('imu_srv', trigger_srv, sensor.service_callback )
+    rospy.Service('imu_srv', trigger_srv, sensor.service_callback )
 
     rospy.loginfo('Service started! Waiting for a call...')
 
