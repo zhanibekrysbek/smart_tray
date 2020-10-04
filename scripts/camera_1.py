@@ -18,26 +18,11 @@ def main():
 
     cam = Camera('camera_1')
     pub = rospy.Publisher('/camera_1', Image, queue_size=10)
-    serv = rospy.Service('camera_1', trigger_srv, cam.service_callback )
+    rospy.Service('camera_1', trigger_srv, cam.service_callback )
 
     cam.run(0, pub)
 
     rospy.spin()
-
-    # cap = cv2.VideoCapture(0)
-    # r = rospy.Rate(30);
-
-    # while not rospy.is_shutdown():
-    #     ret, frame = cap.read()
-    #     if ret==True:
-    #         conv_frame = bridge().cv2_to_imgmsg(frame,"bgr8")
-    #         pub.publish(conv_frame)
-
-    #     r.sleep()
-
-    # cap.release()
-    # cv2.destroyAllWindows()
-
 
 def stop():
     rospy.loginfo('Ending the program!')

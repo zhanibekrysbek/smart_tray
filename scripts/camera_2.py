@@ -19,7 +19,7 @@ def main():
 
     cam = Camera('camera_2')
     pub = rospy.Publisher('/camera_2', Image, queue_size=10)
-    serv = rospy.Service('camera_2', trigger_srv, cam.service_callback )
+    rospy.Service('camera_2', trigger_srv, cam.service_callback )
 
     cam.run(1, pub)
 
