@@ -58,7 +58,10 @@ add_message_files(
 ## Generate services in the 'srv' folder
 add_service_files(
   FILES
-  imu_srv.srv
+  trigger_srv.srv
+  # imu_srv.srv
+  # camera_1_srv.srv
+  # camera_2_srv.srv
 #   Service1.srv
 #   Service2.srv
 )

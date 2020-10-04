@@ -4,7 +4,7 @@ import rospy
 import sys
 import time
 from smart_tray.srv import imu_srv
-from smart_tray.msg import imu_msg
+from smart_tray.msg import trigger_srv
 
 
 sys.path.append( '/home/pi/LSM9DS1_RaspberryPi_Library/example')
@@ -118,7 +118,7 @@ def main():
 
     sensor = IMU_sensor('imu_srv')
 
-    serv = rospy.Service('imu_srv', imu_srv, sensor.service_callback )
+    serv = rospy.Service('imu_srv', trigger_srv, sensor.service_callback )
 
     rospy.loginfo('Service started! Waiting for a call...')
 
