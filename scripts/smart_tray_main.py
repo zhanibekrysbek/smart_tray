@@ -5,7 +5,8 @@ import subprocess
 import time
 from datetime import datetime
 from std_msgs.msg import Float64, String
-from rft_sensor_serial.srv import rft_operation, rft_operation_2
+from rft_sensor_serial.srv import rft_operation
+from smart_tray.srv import trigger_srv
 
 
 class smart_tray(object):
@@ -21,25 +22,32 @@ class smart_tray(object):
 	def __init__(self):
 
 		# Set COM port params
-		rospy.set_param('RFT_COM_PORT', '/dev/ttyUSB0')
-		rospy.set_param('RFT_COM_PORT_2', '/dev/ttyUSB1')
+		rospy.set_param('RFT_COM_PORT', '/dev/ttyUSB1')
+		rospy.set_param('RFT_COM_PORT_2', '/dev/ttyUSB2')
 
 		# wait until services will be available in the network
 		rospy.wait_for_service('rft_serial_op_service')
 		rospy.wait_for_service('rft_serial_op_service_2')
+		rospy.wait_for_service('imu_srv')
+		rospy.wait_for_service('camera_1')
 
 		rospy.loginfo('Both RFT sensors are available!')
 
 		self.rft_srv_1 = rospy.ServiceProxy('rft_serial_op_service', rft_operation)
-		self.rft_srv_2 = rospy.ServiceProxy('rft_serial_op_service_2', rft_operation_2)
+		self.rft_srv_2 = rospy.ServiceProxy('rft_serial_op_service_2', rft_operation)
+		self.imu_srv = rospy.ServiceProxy('imu_srv', trigger_srv)
+		self.camera_1_srv = rospy.ServiceProxy('camera_1', trigger_srv)
 
 	def start(self):
 		# Call Serial Number so it gets written in message frame.
 		res1 = self.rft_srv_1(2,0,0,0)
 		res2 = self.rft_srv_2(2,0,0,0)
+		res3 = self.imu_srv('start')
+		res4 = self.camera_1_srv('start')
 
 		if res1.result !=0 or res2.result !=0:
 			rospy.logwarn('Something wrong with Sensor Communication!')
+
 
 		rospy.sleep(0.5)
 		# apply bias
@@ -58,6 +66,8 @@ class smart_tray(object):
 		rospy.loginfo('Ending the program!')
 		self.rft_srv_1(12,0,0,0)
 		self.rft_srv_2(12,0,0,0)
+		self.imu_srv('stop')
+		self.camera_1_srv('stop')
 
 '''
 	This node is a central program that initiates sensor readings.
