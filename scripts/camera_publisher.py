@@ -43,7 +43,7 @@ class Camera(object):
         seq = 0
         while not rospy.is_shutdown():
             if self.state:
-                ret, frame = cap.read()
+                ret, frame = self.cap.read()
                 if ret==True:
                     img_msg = bridge().cv2_to_imgmsg(frame,"bgr8")
                     img_msg.header.stamp = rospy.get_rostime()
@@ -55,5 +55,5 @@ class Camera(object):
 
             self.rate.sleep()
 
-        cap.release()
+        self.cap.release()
         cv2.destroyAllWindows()
