@@ -29,6 +29,7 @@ class Camera(object):
 
         elif req.req == 'stop':
             self.state = False
+            self.cap.release()
             rospy.loginfo('%s: going silent', self.name)
             return 'Going silent Camera_1'
 
@@ -38,7 +39,7 @@ class Camera(object):
     # Will output images based on request. Otherwise stays silent.
     def run(self, cam_id, pub):
 
-        cap = cv2.VideoCapture(cam_id)
+        self.cap = cv2.VideoCapture(cam_id)
         seq = 0
         while not rospy.is_shutdown():
             if self.state:
