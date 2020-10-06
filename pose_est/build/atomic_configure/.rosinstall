@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/ki-hwan/catkin_ws/src/pose_est/build/devel/setup.sh

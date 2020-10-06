@@ -1,0 +1,8 @@
+prefix=/home/ki-hwan/catkin_ws/src/pose_est/build/devel
+
+Name: pose_est
+Description: Description of pose_est
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 
