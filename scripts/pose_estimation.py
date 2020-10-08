@@ -2,125 +2,132 @@
 
 import rospy
 import sys
+sys.path.insert(1,'/home/zhanibek/.local/lib/python2.7/site-packages/cv2')
 from sensor_msgs.msg import Image
+from geometry_msgs.msg import PoseStamped
 from cv_bridge import CvBridge as bridge
 import numpy as np
-from scipy.linalg import norm
+# from scipy.linalg import norm
 import cv2
-import cv2.aruco as aruco
-import glob
+from cv2 import aruco
+import yaml
+import utils
 
-def callback(data):
-    frame = bridge().imgmsg_to_cv2(data,"bgr8")
+rvec_prev = None
+tvec_prev = None
 
-    # marker size of a single aruco marker(in meters)
-    global marker_size
-    marker_size=0.032
+pub = None
 
-    # termination criteria for the iterative algorithm
-    global criteria
-    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
-    mtx, dist = camera_calib()
-    frame,ids,cam_marker_dist = aruco_track(frame,mtx,dist)
+class TrayLocalization(object):
 
-    cv2.imshow('frame',frame)
-    cv2.waitKey(1)
-    if ids is None:
-        print "There are no markers."
-    else:
-        disp = ""
-        for i in range(0, ids.size):
-            disp+="Distance btw Marker id {} and camera:{} (cm)\n".format(ids[i],cam_marker_dist[i])
-        print disp
+    def __init__(self, board, posePub, calib_data, mrklen, 
+                aruco_dict, name='cam1_pose', camtopic = '/camera_1' ):
+        
+        # Initialize Set of Params:
+        
+        # Name of this module
+        self.name = name
+        self.board = board
+        self.aruco_dict = aruco_dict
+        self.mrklen = mrklen
+        
+        # Camera Calibration Data
+        self.camera_matrix = calib_data['camera_matrix']
+        self.dist_coeffs = calib_data['dist_coeffs']
+        
+        # Publishers
+        self.posePub = posePub  # Pose Publisher object 
+        self.processedImagePub = rospy.Publisher('/aruco_'+self.name, Image, queue_size=10) # Annotated image publisher
+        self.logPub = NotImplemented
+        
+        #
+        self.recursiveTracking = True
+        self.rvec_prev = None
+        self.tvec_prev = None        
 
-# Camera Calibration
-def camera_calib():
-    # prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(6,5,0)
-    # checkerboard of size (9 x 6) is used
-    objp = np.zeros((6*9,3), np.float32)
-    objp[:,:2] = np.mgrid[0:9,0:6].T.reshape(-1,2)
 
-    # arrays to store object points and image points from all the images.
-    objpoints = [] # 3d point in real world space
-    imgpoints = [] # 2d points in image plane.
+    def callback(self, data):
 
-    # iterating through all calibration images
-    # in the folder
-    images = glob.glob("calib_images/*.jpg")
-    for fname in images:
-        img = cv2.imread(fname)
-        gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+        pose = PoseStamped()
+        pose.header = data.header
 
-        # find the chess board (calibration pattern) corners
-        ret, corners = cv2.findChessboardCorners(gray, (9,6), None)
+        frame = bridge().imgmsg_to_cv2(data,"bgr8")
 
-        # if calibration pattern is found, add object points,
-        # image points (after refining them)
-        if ret == True:
-            objpoints.append(objp)
+        retval, frame, rvec, tvec, loggs = self.estimatePose(frame)
 
-            # Refine the corners of the detected corners
-            corners2 = cv2.cornerSubPix(gray,corners,(11,11),(-1,-1),criteria)
-            imgpoints.append(corners2)
-
-            # Draw and display the corners
-            img = cv2.drawChessboardCorners(img, (9,6), corners2, ret)
-
+        if retval:
+            pose.pose.position.x, pose.pose.position.y, pose.pose.position.z = tvec.flatten()
+            pose.operation = NotImplemented
         else:
-            break
+            rospy.loginfo('No Markers Detected')
 
-    ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
-    return [mtx, dist]
+        frame_msg = bridge().cv2_to_imgmsg(frame,'bgr8')
+        self.posePub.publish(pose)
+        self.processedImagePub.publish(frame)
 
-# Aruco Tracking and Calculating the distance to the camera
-def aruco_track(frame,mtx,dist):
-    # operations on the frame
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-    # set dictionary size depending on the aruco marker selected
-    aruco_dict = aruco.Dictionary_get(aruco.DICT_6X6_250)
+    # Aruco Tracking and Calculating the distance to the camera
+    def estimatePose(self, frame):
 
-    # detector parameters can be set here (List of detection parameters[3])
-    parameters = aruco.DetectorParameters_create()
-    parameters.adaptiveThreshConstant = 10
+        rvec = None
+        tvec = None
 
-    # lists of ids and the corners belonging to each id
-    corners, ids, rejectedImgPoints = aruco.detectMarkers(gray, aruco_dict, parameters=parameters)
-    
+        # detector parameters can be set here (List of detection parameters[3])
+        parameters = aruco.DetectorParameters_create()
+        parameters.adaptiveThreshConstant = 10
 
-    # check if the ids list is not empty
-    # if no check is added the code will crash
-    if ids is None:
-        # code to show when no markers are found
-        cv2.putText(frame, "No Markers", (0,64), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,0,0), 1, cv2.LINE_AA)
-        cam_marker_dist = [None]
-    else:
-        # estimate pose of each marker and return the values
-        # rvet and tvec-different from camera coefficients
-        rvec, tvec ,_ = aruco.estimatePoseSingleMarkers(corners, marker_size, mtx, dist)
-        cam_marker_dist = [None]*len(ids)
+        # lists of ids and the corners belonging to each id
+        corners, ids, rejectedImgPoints = aruco.detectMarkers(frame, self.aruco_dict, parameters=parameters)
+        corners, ids, rjcorners, recids = aruco.refineDetectedMarkers(frame, self.board, corners, ids, 
+                                                            rejectedImgPoints, self.camera_matrix, self.dist_coeffs)
+        
+        # if no any marker is detected:
+        if ids is None:
+            # code to show when no markers are found
+            cv2.putText(frame, "No Markers", (3,64), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,0,0), 1, cv2.LINE_AA)
+            self.rvec_prev = None
+            self.tvec_prev = None
 
-        for i in range(0, ids.size):
-            # draw axis for the aruco markers
-            aruco.drawAxis(frame, mtx, dist, rvec[i], tvec[i], 0.04)
-            cam_marker_dist[i] = 100*norm(tvec[i])
+        # if some markers are detected: Run Pose Estimation
+        else:
+            # estimate pose of each marker and return the values
+            # rvet and tvec-different from camera coefficients
+            retval, rvec, tvec = aruco.estimatePoseBoard( 
+                                            corners, ids, self.board, self.camera_matrix, 
+                                            self.dist_coeffs, None, None, False )
 
-        # draw a square around the markers
-        aruco.drawDetectedMarkers(frame, corners, ids)
+            if type(self.rvec_prev)==np.ndarray and self.recursiveTracking:
+                retval, rvec, tvec = aruco.estimatePoseBoard(
+                                            corners, ids, self.board, 
+                                            self.camera_matrix, self.dist_coeffs,
+                                            self.rvec_prev, self.tvec_prev, True)
+                self.rvec_prev = rvec
+                self.tvec_prev = tvec
 
-    return [frame,ids,cam_marker_dist]
+            if retval:
+                # Draw the Tray Coordinate system
+                aruco.drawAxis( frame, self.camera_matrix, self.dist_coeffs, rvec, tvec, 2*self.mrklen )
+                # draw a square around the markers
+                aruco.drawDetectedMarkers(frame, corners, ids)
+
+
+        return frame, rvec, tvec
 
 
 def main():
-    rospy.init_node("retrieve_image")
-    rospy.Subscriber("/color_image", Image, callback)
+    global pub
+    rospy.init_node("camera_1_pose_estimation")
+    
+    pub = rospy.Publisher('/cam_1_pose_estimation', PoseStamped, queue_size=10)
+    rospy.Subscriber("/camera_1", Image, callback)
+    
+
     rospy.spin()
+
+
     # When everything done, release the capture
     cv2.destroyAllWindows()
 
 if __name__=='__main__':
     main()
-
-
-

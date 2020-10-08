@@ -1,25 +1,21 @@
-#!/usr/bin/env python
 
-import numpy as np
 import cv2
-from matplotlib import pyplot as plt
-import cv2.aruco as aruco
-import glob
-import yaml
+import numpy as np
+from cv2 import aruco
+from tqdm import tqdm_notebook
+from phri.utils import *
+
+
+'''
+Camera calibration procedure using Charuco Boards.
+'''
 
 class Calibrate_Camera:
     """Calibrate an individual camera"""
-    def __init__(self):
-        self.dictionary = aruco.Dictionary_get(aruco.DICT_6X6_250)
-        self.row = 7  # horizontal
-        self.col = 5  # vertical
-        self.sqr = 1  # solid black squares
-        self.mrk = 0.8 # markers, must be smaller than squares
-        self.board = aruco.CharucoBoard_create(
-            self.col,self.row,
-            self.sqr,
-            self.mrk,
-            self.dictionary)
+    def __init__(self, board):
+
+        self.board = board
+        self.dictionary = self.board.dictionary
 
     def calculateReprojectionError(self, imgpoints, objpoints, rvecs, tvecs, mtx, dist):
         """
@@ -42,16 +38,17 @@ class Calibrate_Camera:
         total_error = mean_error/len(objpoints)
         return total_error
 
-    def calibrate(self):
+    def calibrate(self, images):
+
         corners_all = []  # corners in all images
         ids_all = []  # ids found in all images
         image_size = None
 
-        images = glob.glob('./calib_images/*.jpg')
+#         images = glob.glob('./calib_images/*.jpg')
 
-        for imname in images:
+        for imname in tqdm_notebook(images):
 
-            img = cv2.imread(imname)
+            img = read_image(imname)
 
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
               
@@ -93,17 +90,3 @@ class Calibrate_Camera:
         }
 
         return cam_cal_data
-        
-        
-
-def main():
-    c = Calibrate_Camera()
-    c_data = c.calibrate()
-    print c_data
-    f = open('calibration.yaml', 'w')
-    yaml.dump(c_data, f)
-    f.close()
-
-
-if __name__=='__main__':
-    main()
