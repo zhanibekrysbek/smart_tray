@@ -20,12 +20,13 @@ from phri import utils
 class TrayLocalization(object):
 
     def __init__(self, board, calib_data, mrklen, 
-                aruco_dict, name='cam1_pose'):
+                aruco_dict, name='cam1_pose', camname='camera_1'):
         
         # Initialize Set of Params:
         
         # Name of this module
         self.name = name
+        self.camname = camname
         self.board = board
         self.aruco_dict = aruco_dict
         self.mrklen = mrklen
@@ -36,7 +37,7 @@ class TrayLocalization(object):
         
         # Publishers
         self.posePub = rospy.Publisher('/'+self.name+'_estimation', PoseStamped, queue_size=10)  # Pose Publisher object 
-        self.processedImagePub = rospy.Publisher('/aruco_'+self.name, Image, queue_size=10) # Annotated image publisher
+        self.processedImagePub = rospy.Publisher('/aruco_image'+self.camname, Image, queue_size=10) # Annotated image publisher
         
         # Tracking params
         self.recursiveTracking = True
@@ -125,7 +126,8 @@ def main():
         calib_data=conf.logitech_t1_calibration, 
         mrklen=conf.mrklen,
         aruco_dict=conf.aruco_dict, 
-        name='cam1_pose'
+        name='cam1_pose',
+        camname='camera_1'
         )
 
     rospy.Subscriber('/camera_1', Image,callback=tloc1.callback)

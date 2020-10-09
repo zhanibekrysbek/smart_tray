@@ -59,6 +59,10 @@ class smart_tray(object):
 		res1 = self.rft_srv_1(17,1,0,0)
 		res2 = self.rft_srv_2(17,1,0,0)
 
+		if res1.result ==0 and res2.result ==0:
+			rospy.loginfo('Both sensors are publishing!')
+
+
 	# to be called on rospy shutdown
 	def stop(self):
 
