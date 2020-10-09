@@ -9,10 +9,19 @@ from cv2 import aruco
 aruco_dict = aruco.Dictionary_get(aruco.DICT_4X4_50)
 mrklen = 0.115
 
-# Template
+'''
+Every marker in the tray is viewed as linearly translated squares from the origin.
+Therefore, we only need to define 3 template markers to describe all 8 markers across 3 different planes.
+As a result, Coordinates of each marker is found by summing their respective translation from the origin.
+
+In Aruco library, canonical representation of corner points of markers are defined as below:
+    - The order of corners are clock-wise
+    - first corner point is the one where you get red small circle when aruco.drawDetectedMarkers is called.
+'''
+# Template Locations for three planes
 side_marker0_right = np.array(
              [[0., 0., -mrklen],
-              [0., 0., 0.], #1
+              [0., 0., 0.], 
               [mrklen, 0., 0.],
               [mrklen, 0., -mrklen]], dtype=np.float32)
 
@@ -50,15 +59,13 @@ offsets_top = np.array(
                     [0.07623, -0.0129, 0.]  # 27
                    ], dtype=np.float32) 
 
-
+# Define all corner points for 8 markers
 board_corners = [side_marker0_right + offset for offset in offsets_right]
 board_corners += [side_marker0_left + offset for offset in offsets_left]
 board_corners += [top_marker0 + offset for offset in offsets_top]
-
+# Order of ids must coincide with board corners
 board_ids = np.array( [[20],[21], [22], [24], [25], [23], [26], [27]], dtype=np.int32)
 board = aruco.Board_create(board_corners, aruco_dict, board_ids)
-
-
 
 
 logitech_t1_calibration = {

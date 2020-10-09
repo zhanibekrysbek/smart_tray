@@ -3,26 +3,22 @@
 import rospy
 import sys
 sys.path.insert(1,'/home/zhanibek/.local/lib/python2.7/site-packages/cv2')
+import cv2
+from cv2 import aruco
+import numpy as np
+
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import PoseStamped
 from cv_bridge import CvBridge as bridge
-import numpy as np
-# from scipy.linalg import norm
-import cv2
-from cv2 import aruco
-import yaml
-import utils
 
-rvec_prev = None
-tvec_prev = None
+import conf
 
-pub = None
 
 
 class TrayLocalization(object):
 
-    def __init__(self, board, posePub, calib_data, mrklen, 
-                aruco_dict, name='cam1_pose', camtopic = '/camera_1' ):
+    def __init__(self, board, calib_data, mrklen, 
+                aruco_dict, name='cam1_pose'):
         
         # Initialize Set of Params:
         
@@ -37,7 +33,7 @@ class TrayLocalization(object):
         self.dist_coeffs = calib_data['dist_coeffs']
         
         # Publishers
-        self.posePub = posePub  # Pose Publisher object 
+        self.posePub = rospy.Publisher('/'+self.name+'_estimation', PoseStamped, queue_size=10)  # Pose Publisher object 
         self.processedImagePub = rospy.Publisher('/aruco_'+self.name, Image, queue_size=10) # Annotated image publisher
         self.logPub = NotImplemented
         
@@ -49,29 +45,30 @@ class TrayLocalization(object):
 
     def callback(self, data):
 
-        pose = PoseStamped()
-        pose.header = data.header
+        trayPose = PoseStamped()
+        trayPose.header = data.header
 
         frame = bridge().imgmsg_to_cv2(data,"bgr8")
 
-        retval, frame, rvec, tvec, loggs = self.estimatePose(frame)
+        retval, frame, rvec, tvec = self.estimatePose(frame)
 
         if retval:
-            pose.pose.position.x, pose.pose.position.y, pose.pose.position.z = tvec.flatten()
-            pose.operation = NotImplemented
-        else:
-            rospy.loginfo('No Markers Detected')
+            trayPose.pose.position.x, trayPose.pose.position.y, trayPose.pose.position.z = tvec.flatten()
+            trayPose.pose.orientation = NotImplemented
+        # else:
+            # rospy.loginfo('No Markers Detected')
 
         frame_msg = bridge().cv2_to_imgmsg(frame,'bgr8')
-        self.posePub.publish(pose)
-        self.processedImagePub.publish(frame)
+        self.posePub.publish(trayPose)
+        self.processedImagePub.publish(frame_msg)
 
 
-    # Aruco Tracking and Calculating the distance to the camera
+    # Aruco 3D-Board Tracking and Pose Estimation
     def estimatePose(self, frame):
 
         rvec = None
         tvec = None
+        res = False
 
         # detector parameters can be set here (List of detection parameters[3])
         parameters = aruco.DetectorParameters_create()
@@ -82,6 +79,7 @@ class TrayLocalization(object):
         corners, ids, rjcorners, recids = aruco.refineDetectedMarkers(frame, self.board, corners, ids, 
                                                             rejectedImgPoints, self.camera_matrix, self.dist_coeffs)
         
+        rospy.loginfo(ids)
         # if no any marker is detected:
         if ids is None:
             # code to show when no markers are found
@@ -91,13 +89,15 @@ class TrayLocalization(object):
 
         # if some markers are detected: Run Pose Estimation
         else:
+            retval = False
             # estimate pose of each marker and return the values
             # rvet and tvec-different from camera coefficients
-            retval, rvec, tvec = aruco.estimatePoseBoard( 
-                                            corners, ids, self.board, self.camera_matrix, 
-                                            self.dist_coeffs, None, None, False )
+            if not self.recursiveTracking:
+                retval, rvec, tvec = aruco.estimatePoseBoard( 
+                                                corners, ids, self.board, self.camera_matrix, 
+                                                self.dist_coeffs, None, None, False )
 
-            if type(self.rvec_prev)==np.ndarray and self.recursiveTracking:
+            elif type(self.rvec_prev)==np.ndarray and self.recursiveTracking:
                 retval, rvec, tvec = aruco.estimatePoseBoard(
                                             corners, ids, self.board, 
                                             self.camera_matrix, self.dist_coeffs,
@@ -110,24 +110,28 @@ class TrayLocalization(object):
                 aruco.drawAxis( frame, self.camera_matrix, self.dist_coeffs, rvec, tvec, 2*self.mrklen )
                 # draw a square around the markers
                 aruco.drawDetectedMarkers(frame, corners, ids)
+                res = True
 
-
-        return frame, rvec, tvec
+        return res, frame, rvec, tvec
 
 
 def main():
-    global pub
+
     rospy.init_node("camera_1_pose_estimation")
+    rospy.loginfo('camera_1_pose_estimation is initialized!')
+
     
-    pub = rospy.Publisher('/cam_1_pose_estimation', PoseStamped, queue_size=10)
-    rospy.Subscriber("/camera_1", Image, callback)
-    
+    tloc1 = TrayLocalization(
+        board=conf.board, 
+        calib_data=conf.logitech_t1_calibration, 
+        mrklen=conf.mrklen,
+        aruco_dict=conf.aruco_dict, 
+        name='cam1_pose'
+        )
+
+    rospy.Subscriber('/camera_1', Image,callback=tloc1.callback)
 
     rospy.spin()
-
-
-    # When everything done, release the capture
-    cv2.destroyAllWindows()
 
 if __name__=='__main__':
     main()
