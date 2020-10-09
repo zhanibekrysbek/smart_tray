@@ -8,5 +8,7 @@
 
 	<node name="camera_1" pkg="smart_tray" type="camera_1.py"/>
 
+	<node name="pose_estimation" pkg="smart_tray" type="pose_estimation.py"/>
+
 
 </launch>

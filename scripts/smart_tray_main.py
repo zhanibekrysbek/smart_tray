@@ -22,8 +22,8 @@ class smart_tray(object):
 	def __init__(self):
 
 		# Set COM port params
-		rospy.set_param('RFT_COM_PORT', '/dev/ttyUSB1')
-		rospy.set_param('RFT_COM_PORT_2', '/dev/ttyUSB2')
+		rospy.set_param('RFT_COM_PORT', '/dev/ttyUSB2')
+		rospy.set_param('RFT_COM_PORT_2', '/dev/ttyUSB3')
 
 		# wait until services will be available in the network
 		rospy.wait_for_service('rft_serial_op_service')
@@ -48,17 +48,16 @@ class smart_tray(object):
 		if res1.result !=0 or res2.result !=0:
 			rospy.logwarn('Something wrong with Sensor Communication!')
 
-
-		rospy.sleep(0.5)
-		# apply bias
-		res1 = self.rft_srv_1(17,1,0,0)
-		res2 = self.rft_srv_2(17,1,0,0)
-
 		rospy.sleep(0.5)
 
 		# trigger two nodes to broadcast data
 		self.rft_srv_1(11,0,0,0)
 		self.rft_srv_2(11,0,0,0)
+
+		rospy.sleep(0.5)
+		# apply bias
+		res1 = self.rft_srv_1(17,1,0,0)
+		res2 = self.rft_srv_2(17,1,0,0)
 
 	# to be called on rospy shutdown
 	def stop(self):
@@ -77,7 +76,7 @@ class smart_tray(object):
 	3. Service call for IMU
 	4. Service call for camera_1
 	5. Service call for camera_2
-	6. ? Service call for pose estimation
+	6. 
 
 
 '''
