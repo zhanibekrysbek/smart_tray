@@ -10,7 +10,7 @@ from smart_tray.srv import trigger_srv
 
 
 program_id = 1
-camera_id = 0
+camera_id = 1
 
 def main():
 

@@ -43,6 +43,8 @@ class Camera(object):
     def run(self, cam_id, pub):
 
         self.cap = cv2.VideoCapture(cam_id)
+        codec = cv2.VideoWriter_fourcc( 'M', 'J', 'P', 'G')
+        self.cap.set(cv2.CAP_PROP_FOURCC,codec)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.width)
         self.cap.set(cv2.CAP_PROP_FPS, self.freq)
