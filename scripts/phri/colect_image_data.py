@@ -15,7 +15,7 @@ import numpy as np
 This code is used to collect images from a camera.
 '''
 
-path2save = '/home/ki-hwan/catkin_ws/src/smart_tray/data/pose_estimation/calibration/logitech_t1/images'
+path2save = '/home/ki-hwan/catkin_ws/src/smart_tray/data/pose_estimation/calibration/logitech_t2/images'
 
 # A class to fetch color images from Kinect
 class color_image:
@@ -23,7 +23,7 @@ class color_image:
     def __init__(self):
 
         self.bridge = CvBridge()
-        self.image_sub = rospy.Subscriber('/camera_2', Image, self.callback)
+        self.image_sub = rospy.Subscriber('/camera_3', Image, self.callback)
         self.image = None
 
     def callback(self,data):
