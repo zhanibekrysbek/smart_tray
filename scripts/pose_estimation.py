@@ -63,6 +63,7 @@ class TrayLocalization(object):
             trayPose.pose.orientation = quat
 
         frame_msg = bridge().cv2_to_imgmsg(frame,'bgr8')
+        frame_msg.header = data.header
         self.posePub.publish(trayPose)
         self.processedImagePub.publish(frame_msg)
 
@@ -98,6 +99,8 @@ class TrayLocalization(object):
                                             corners, ids, self.board, 
                                             self.camera_matrix, self.dist_coeffs, 
                                             None, None, False )
+            self.rvec_prev = rvec
+            self.tvec_prev = tvec
 
         if retval:
             # Draw the Tray Coordinate system
@@ -131,6 +134,18 @@ def main():
         )
 
     rospy.Subscriber('/camera_1', Image,callback=tloc1.callback)
+
+
+    # tloc2 = TrayLocalization(
+    #     board=conf.board, 
+    #     calib_data=conf.logitech_t1_calibration, 
+    #     mrklen=conf.mrklen,
+    #     aruco_dict=conf.aruco_dict, 
+    #     name='cam1_pose',
+    #     camname='camera_2'
+    #     )
+
+    # rospy.Subscriber('/camera_2', Image,callback=tloc2.callback)
 
     rospy.spin()
 

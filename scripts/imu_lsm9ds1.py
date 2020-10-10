@@ -100,7 +100,7 @@ class IMU_sensor():
                 msg.header.seq = ind
                 msg.header.stamp.secs = rtime.secs
                 msg.header.stamp.nsecs = rtime.nsecs
-                msg.header.frame_id = "LSM9DS1_IMU_SENSOR_DATA"
+                msg.header.frame_id = "LSM9DS1_IMU_SENSOR_DATA_"+str(ind)
 
                 ind += 1
                 pub.publish(msg)
