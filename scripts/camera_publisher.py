@@ -9,7 +9,7 @@ from cv_bridge import CvBridge as bridge
 '''
 class Camera(object):
 
-    def __init__(self, name, program_id=1, freq = 30, height = 1080, width = 1920):
+    def __init__(self, name, program_id=1, freq = 30, height = 720, width = 1280):
         # false: silent
         # true: talking
         self.state = False

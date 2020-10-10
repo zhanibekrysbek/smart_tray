@@ -9,8 +9,12 @@ from camera_publisher import Camera
 from smart_tray.srv import trigger_srv
 
 
+'''
+Logitech t1 camera
+'''
+
 program_id = 2
-camera_id = 0
+camera_id = 1
 
 def main():
 
@@ -20,7 +24,7 @@ def main():
 
     topic_name = '/camera_' + str(program_id)
 
-    cam = Camera(name = topic_name, program_id=program_id)
+    cam = Camera(name = topic_name, program_id=program_id, height=720, width=1280)
 
 
     pub = rospy.Publisher(topic_name, Image, queue_size=10)

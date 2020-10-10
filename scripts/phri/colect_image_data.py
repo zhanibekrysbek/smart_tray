@@ -2,7 +2,7 @@
 
 import os
 import sys
-sys.path.insert(1,'/home/zhanibek/.local/lib/python2.7/site-packages/cv2')
+sys.path.insert(1,'/home/KOH/.local/lib/python2.7/site-packages/cv2')
 import cv2
 import rospy
 import argparse
@@ -15,7 +15,7 @@ import numpy as np
 This code is used to collect images from a camera.
 '''
 
-path2save = '/home/zhanibek/catkin_ws/src/smart_tray/data/pose_estimation/calibration/logitech_t1/images'
+path2save = '/home/catkin_ws/src/smart_tray/data/pose_estimation/calibration/logitech_t1/images'
 
 # A class to fetch color images from Kinect
 class color_image:
