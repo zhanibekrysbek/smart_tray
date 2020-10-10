@@ -32,6 +32,9 @@ class trayDataParser(object):
 
 		self.bridge = CvBridge() 
 
+		self.t0 = self.bag.get_start_time()
+		self.tf = self.bag.get_end_time()
+
 		if not os.path.exists(destination):
 			os.mkdir(destination)
 
@@ -47,6 +50,8 @@ class trayDataParser(object):
 		for topic_type in self.topiclist.keys():
 
 			for topic in self.topiclist[topic_type]:
+				print('\n\n\t %s topic is being processed!\n'%topic)
+
 				msgs = self.bag.read_messages(topic)
 				cnts = self.bag.get_message_count(topic)
 				if topic_type=='rft':
@@ -59,7 +64,7 @@ class trayDataParser(object):
 					resdf = self.parse_img_topic(msgs, topic, total_msgs=cnts)
 
 				res[topic] = resdf
-				print('\n\t %s topic is processed!\n\n'%topic)
+				
 
 		meta_data_name = os.path.join(self.destination, self.base_name + '_meta_data.pkl')
 		pickle.dump(res, open(meta_data_name,'w'))
@@ -90,13 +95,14 @@ class trayDataParser(object):
 		res['message_count'] = counts
 		res['frequency'] = freqs
 		res['msg_type'] = msg_types
+		res['start_time'] = [self.t0] * len(counts)
+		res['end_time'] = [self.tf] * len(counts)
 		res.index = np.arange(len(counts))
 		print '\n==================================== ROS bag Info ======================================\n'
 		print res
 		print '\n========================================================================================\n'
 		self.summary = res
 		return res
-
 
 	def parse_img_topic(self, msgs, topic_name, total_msgs):
 	

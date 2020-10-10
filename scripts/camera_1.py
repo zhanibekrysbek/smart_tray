@@ -10,7 +10,7 @@ from smart_tray.srv import trigger_srv
 
 
 program_id = 1
-camera_id = 2
+camera_id = 0
 
 def main():
 
@@ -20,7 +20,7 @@ def main():
 
     topic_name = '/camera_' + str(program_id)
 
-    cam = Camera(name = topic_name, program_id=program_id)
+    cam = Camera(name = topic_name, program_id=program_id, freq=60)
 
 
     pub = rospy.Publisher(topic_name, Image, queue_size=10)

@@ -9,13 +9,16 @@ from cv_bridge import CvBridge as bridge
 '''
 class Camera(object):
 
-    def __init__(self, name, program_id=1, rate = 30):
+    def __init__(self, name, program_id=1, freq = 30, height = 1080, width = 1920):
         # false: silent
         # true: talking
         self.state = False
         self.name = name
-        self.rate = rospy.Rate(rate)
+        self.freq = freq
+        self.rate = rospy.Rate(self.freq)
         self.program_id = program_id
+        self.height = height
+        self.width = width
 
     # Service callback meant to be referenced by parent thread 
     def service_callback(self, req):
@@ -40,6 +43,10 @@ class Camera(object):
     def run(self, cam_id, pub):
 
         self.cap = cv2.VideoCapture(cam_id)
+        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
+        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.width)
+        self.cap.set(cv2.CAP_PROP_FPS, self.freq)
+
         seq = 0
         while not rospy.is_shutdown():
             if self.state:
