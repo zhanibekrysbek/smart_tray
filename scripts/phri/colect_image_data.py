@@ -2,7 +2,7 @@
 
 import os
 import sys
-sys.path.insert(1,'/home/KOH/.local/lib/python2.7/site-packages/cv2')
+sys.path.insert(1,'/home/ki-hwan/.local/lib/python2.7/site-packages/cv2')
 import cv2
 import rospy
 import argparse
@@ -15,7 +15,7 @@ import numpy as np
 This code is used to collect images from a camera.
 '''
 
-path2save = '/home/catkin_ws/src/smart_tray/data/pose_estimation/calibration/logitech_t1/images'
+path2save = '/home/ki-hwan/catkin_ws/src/smart_tray/data/pose_estimation/calibration/logitech_t1/images'
 
 # A class to fetch color images from Kinect
 class color_image:
@@ -23,7 +23,7 @@ class color_image:
     def __init__(self):
 
         self.bridge = CvBridge()
-        self.image_sub = rospy.Subscriber('/camera_1', Image, self.callback)
+        self.image_sub = rospy.Subscriber('/camera_2', Image, self.callback)
         self.image = None
 
     def callback(self,data):
@@ -55,7 +55,7 @@ def record(name, freq=3):
         stamp = now.strftime("%m%d%Y%H%M%S_%f")
         
         color_name = os.path.join(path2save, name+'_'+str(seq)+'_'+stamp+'.png')
-        
+
         retval = cv2.imwrite(color_name, img)
         
         # import pdb;pdb.set_trace()
