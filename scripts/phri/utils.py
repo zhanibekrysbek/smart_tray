@@ -108,7 +108,7 @@ def g_from_pose(pose):
 
 
 def pose_from_g(g):
-	pos = g[:3.3].flatten()
+	pos = g[:3,3].flatten()
 	quat = tfs.quaternion_from_matrix(g)
 
 	pose = {

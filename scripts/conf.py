@@ -5,6 +5,8 @@ import numpy as np
 from cv2 import aruco
 
 
+
+
 # set dictionary size depending on the aruco marker selected
 aruco_dict = aruco.Dictionary_get(aruco.DICT_4X4_50)
 mrklen = 0.115
@@ -69,20 +71,19 @@ board = aruco.Board_create(board_corners, aruco_dict, board_ids)
 
 
 
-
+# Aruco board at Global Reference Frame
 sep_grf = 0.02274
 mrklen_grf = 0.11376 
 board_grf = aruco.GridBoard_create(1, 2, mrklen_grf, sep_grf, aruco_dict, 11)
 
-
+# Calibration Matricies
 
 logitech_t1_calibration = {
-    'camera_matrix':
-        np.array([[524.10342668,   0.        , 323.49844061],
-                  [  0.        , 522.73949737, 250.24476893],
-                  [  0.        ,   0.        ,   1.        ]]),
-    'dist_coeffs': 
-        np.array([[ 0.06786745, -0.25414535,  0.0063491 ,  0.00304427, -0.00894483]])}
+    'camera_matrix': np.array([[1.27831893e+03, 0.00000000e+00, 5.97628286e+02],
+                           [0.00000000e+00, 1.27172102e+03, 3.39798230e+02],
+                           [0.00000000e+00, 0.00000000e+00, 1.00000000e+00]]),
+    'dist_coeffs': np.array([[1.58937438e-01, -2.99387919e+00, -5.15528449e-03,
+                          -1.48101613e-02,  2.66031340e+01]]), }
 
 
 
@@ -102,3 +103,29 @@ angetube_calibration = {
                [  0.        ,   0.        ,   1.        ]]),
     'dist_coeffs': 
     np.array([[-2.72916381e-02,  5.84333722e-02, -5.61004719e-03, 1.21938899e-05, -1.00107964e-01]]),}
+
+
+
+# Camera to Global Reference Frame
+
+cam1togrf = {
+        'position': np.array([-0.08424783074, 0.324654867982, 2.72635259835]),
+        'orientation': np.array([0.864921357688, -0.0240847964417, 0.0349296192448, 0.500110877001])
+    }
+
+
+cam2togrf = {
+    'position': np.array([0.0616296271558, 0.0604037171249, 2.54437319469]),
+    'orientation': np.array([0.299749158098, 0.791022507331, -0.498339885241, 0.189976824619])
+}
+
+
+cam3togrf = {
+    'position': np.array([0.362735659737, 0.159482144706, 2.76384149035]),
+    'orientation': np.array([-0.292728724611, 0.813568628237, -0.459047618536, -0.204184389348])
+}
+
+
+
+
+

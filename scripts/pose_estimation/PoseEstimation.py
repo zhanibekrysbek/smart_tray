@@ -2,7 +2,10 @@
 
 import rospy
 import sys
-sys.path.insert(1,'/home/zhanibek/.local/lib/python2.7/site-packages/cv2')
+sys.path.insert(1, '/home/zhanibek/catkin_ws/src/smart_tray/scripts')
+
+# sys.path.insert(1, '..')
+
 import cv2
 from cv2 import aruco
 import numpy as np
@@ -118,50 +121,64 @@ class BoardLocalization(object):
         return retval, frame, rvec, tvec
 
 
-def main():
 
-    rospy.init_node("pose_estimation")
-    rospy.loginfo('pose_estimation is initialized!')
 
-    
-    tloc1 = BoardLocalization(
-        board=conf.board, 
-        calib_data=conf.angetube_calibration, 
-        mrklen=conf.mrklen,
-        aruco_dict=conf.aruco_dict, 
-        name='cam1_tray_pose',
-        camname='camera_1'
+
+
+
+
+
+class TrayInGRF(object):
+
+    def __init__(self, cam2grf, topic, tray_est_top='/cam1_tray_pose_estimation'):
+
+        # Initialize Set of Params:
+
+        # Name of this module
+        self.topic = topic
+        self.tray_est_top = tray_est_top
+        self.cam2grf = cam2grf
+
+        # Publishers
+        self.pub = rospy.Publisher(
+            self.topic, PoseStamped, queue_size=10)  # Pose Publisher object
+
+        rospy.Subscriber(self.tray_est_top, PoseStamped, self.callback)
+
+    def callback(self, data):
+        '''
+        TODO:
+        publish the PoseStamped message at self.pub:
+
+        pose = g_
+        '''
+        pose = PoseStamped()
+
+        pose.header = data.header
+        pose.header.frame_id = 'GRF repr'
+
+        cam2tray = {
+            'position': np.array([data.pose.position.x, data.pose.position.y, data.pose.position.z]),
+            'orientation': np.array([data.pose.orientation.x, data.pose.orientation.y, data.pose.orientation.z, data.pose.orientation.w])
+        }
+
+        grf2tray = self.perform_transformation(self.cam2grf, cam2tray)
+        pose.pose.position.x, pose.pose.position.y, pose.pose.position.z = grf2tray['position'].flatten(
+        )
+        pose.pose.orientation.x, pose.pose.orientation.y, pose.pose.orientation.z, pose.pose.orientation.w = grf2tray['orientation'].flatten(
         )
 
-    rospy.Subscriber('/camera_1', Image,callback=tloc1.callback)
+        self.pub.publish(pose)
 
+    def perform_transformation(self, cam2grf_pose, cam2tray_pose):
 
-    # tloc2 = BoardLocalization(
-    #     board=conf.board, 
-    #     calib_data=conf.logitech_t1_calibration, 
-    #     mrklen=conf.mrklen,
-    #     aruco_dict=conf.aruco_dict, 
-    #     name='cam2_pose',
-    #     camname='camera_2'
-    #     )
+        Gc_grf = utils.g_from_pose(cam2grf_pose)
+        Gc_tray = utils.g_from_pose(cam2tray_pose)
+        Ggrf_tray = np.matmul(utils.inverse(Gc_grf), Gc_tray)
+        grf2tray = utils.pose_from_g(Ggrf_tray)
 
-    # rospy.Subscriber('/camera_2', Image, callback=tloc2.callback)
+        return grf2tray
 
 
 
-    # tloc3 = BoardLocalization(
-    #     board=conf.board, 
-    #     calib_data=conf.logitech_t2_calibration, 
-    #     mrklen=conf.mrklen,
-    #     aruco_dict=conf.aruco_dict, 
-    #     name='cam3_pose',
-    #     camname='camera_3'
-    #     )
 
-    # rospy.Subscriber('/camera_3', Image, callback=tloc3.callback)
-
-
-    rospy.spin()
-
-if __name__=='__main__':
-    main()

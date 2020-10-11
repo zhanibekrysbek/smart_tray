@@ -1,13 +1,26 @@
 <launch>
 
 
-	<node name="camera_1" pkg="smart_tray" type="camera_1.py"/>
+	<node name="camera_1" pkg="smart_tray" type="camera_1.py" output='screen'/>
 
-	<node name="camera_2" pkg="smart_tray" type="camera_2.py"/>
+	<node name="camera_1_pose_estimation" pkg="smart_tray" type="camera_1_pose_estimation.py" output='screen'/>
 
-	<node name="camera_3" pkg="smart_tray" type="camera_3.py"/> -->
+	<node name="tray2grf_1" pkg="smart_tray" type="tray2grf_1.py" output='screen'/>
 
-	<node name="pose_estimation" pkg="smart_tray" type="pose_estimation.py"/>
 
+	
+	<node name="camera_2" pkg="smart_tray" type="camera_2.py" output='screen'/>
+
+	<node name="camera_2_pose_estimation" pkg="smart_tray" type="camera_2_pose_estimation.py" output='screen'/>
+
+	<node name="tray2grf_2" pkg="smart_tray" type="tray2grf_2.py" output='screen'/>
+
+
+
+	<node name="camera_3" pkg="smart_tray" type="camera_3.py" output='screen'/>
+
+	<node name="camera_3_pose_estimation" pkg="smart_tray" type="camera_3_pose_estimation.py" output='screen'/>
+
+	<node name="tray2grf_3" pkg="smart_tray" type="tray2grf_3.py" output='screen'/>
 
 </launch>
