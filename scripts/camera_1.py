@@ -24,7 +24,13 @@ def main():
 
     topic_name = '/camera_' + str(program_id)
 
-    cam = Camera(name = topic_name, program_id=program_id, freq=60, height=1080, width=1920)
+    cam = Camera(
+        name = topic_name, 
+        model = 'angetube', 
+        program_id=program_id, 
+        freq=60, 
+        height=1080, 
+        width=1920)
 
 
     pub = rospy.Publisher(topic_name, Image, queue_size=10)

@@ -8,6 +8,10 @@
 
 	<node name="camera_1" pkg="smart_tray" type="camera_1.py"/>
 
+	<node name="camera_2" pkg="smart_tray" type="camera_2.py"/>
+
+	<node name="camera_3" pkg="smart_tray" type="camera_3.py"/>
+
 	<node name="pose_estimation" pkg="smart_tray" type="pose_estimation.py"/>
 
 

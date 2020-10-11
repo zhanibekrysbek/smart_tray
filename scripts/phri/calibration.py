@@ -81,8 +81,8 @@ class Calibrate_Camera:
         rep_error = self.calculateReprojectionError(imgpts, objpts, rvecs, tvecs, cameraMatrix, distCoeffs)
         
         cam_cal_data = {
-            'cameraMatrix': cameraMatrix,
-            'distCoeffs': distCoeffs,
+            'camera_matrix': cameraMatrix,
+            'dist_coeffs': distCoeffs,
             'rotationVector': rvecs,
             'translationVector': tvecs,
             'reprojectionError': rep_error,

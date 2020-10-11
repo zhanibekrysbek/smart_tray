@@ -30,6 +30,8 @@ class smart_tray(object):
 		rospy.wait_for_service('rft_serial_op_service_2')
 		rospy.wait_for_service('imu_srv')
 		rospy.wait_for_service('camera_1')
+		rospy.wait_for_service('camera_2')
+		rospy.wait_for_service('camera_3')
 
 		rospy.loginfo('Both RFT sensors are available!')
 
@@ -37,6 +39,10 @@ class smart_tray(object):
 		self.rft_srv_2 = rospy.ServiceProxy('rft_serial_op_service_2', rft_operation)
 		self.imu_srv = rospy.ServiceProxy('imu_srv', trigger_srv)
 		self.camera_1_srv = rospy.ServiceProxy('camera_1', trigger_srv)
+		self.camera_2_srv = rospy.ServiceProxy('camera_2', trigger_srv)
+		self.camera_3_srv = rospy.ServiceProxy('camera_3', trigger_srv)
+
+
 
 	def start(self):
 		# Call Serial Number so it gets written in message frame.
@@ -44,6 +50,8 @@ class smart_tray(object):
 		res2 = self.rft_srv_2(2,0,0,0)
 		res3 = self.imu_srv('start')
 		res4 = self.camera_1_srv('start')
+		res5 = self.camera_2_srv('start')
+		res6 = self.camera_3_srv('start')
 
 		if res1.result !=0 or res2.result !=0:
 			rospy.logwarn('Something wrong with Sensor Communication!')
@@ -71,6 +79,8 @@ class smart_tray(object):
 		self.rft_srv_2(12,0,0,0)
 		self.imu_srv('stop')
 		self.camera_1_srv('stop')
+		self.camera_2_srv('stop')
+		self.camera_3_srv('stop')
 
 '''
 	This node is a central program that initiates sensor readings.

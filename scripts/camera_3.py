@@ -14,7 +14,7 @@ Logitech-t2 camera
 '''
 
 program_id = 3
-camera_id = 1
+camera_id = 2
 
 def main():
 
@@ -24,7 +24,13 @@ def main():
 
     topic_name = '/camera_' + str(program_id)
 
-    cam = Camera(name = topic_name, program_id=program_id, freq=30, height=480, width=640)
+    cam = Camera(
+        name = topic_name, 
+        model = 'logitech_t2',
+        program_id=program_id, 
+        freq=30, 
+        height=480, 
+        width=640)
 
 
     pub = rospy.Publisher(topic_name, Image, queue_size=10)

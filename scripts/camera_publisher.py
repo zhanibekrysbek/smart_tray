@@ -9,7 +9,7 @@ from cv_bridge import CvBridge as bridge
 '''
 class Camera(object):
 
-    def __init__(self, name, program_id=1, freq = 30, height = 720, width = 1280):
+    def __init__(self, name, model='logitech_t1', program_id=1, freq = 30, height = 720, width = 1280):
         # false: silent
         # true: talking
         self.state = False
@@ -17,6 +17,7 @@ class Camera(object):
         self.freq = freq
         self.rate = rospy.Rate(self.freq)
         self.program_id = program_id
+        self.model = model
         self.height = height
         self.width = width
 
@@ -57,7 +58,7 @@ class Camera(object):
                     img_msg = bridge().cv2_to_imgmsg(frame,"bgr8")
                     img_msg.header.stamp = rospy.get_rostime()
                     img_msg.header.seq = seq
-                    img_msg.header.frame_id = 'camera_' + str(self.program_id) + '_' + str(seq)
+                    img_msg.header.frame_id = self.model + '_' + str(seq)
                     pub.publish(img_msg)                
                     
                     seq+=1
