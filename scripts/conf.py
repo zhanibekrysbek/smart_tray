@@ -68,6 +68,14 @@ board_ids = np.array( [[20],[21], [22], [24], [25], [23], [26], [27]], dtype=np.
 board = aruco.Board_create(board_corners, aruco_dict, board_ids)
 
 
+
+
+sep_grf = 0.02274
+mrklen_grf = 0.11376 
+board_grf = aruco.GridBoard_create(1, 2, mrklen_grf, sep_grf, aruco_dict, 11)
+
+
+
 logitech_t1_calibration = {
     'camera_matrix':
         np.array([[524.10342668,   0.        , 323.49844061],

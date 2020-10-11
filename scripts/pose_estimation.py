@@ -17,10 +17,10 @@ from phri import utils
 
 
 
-class TrayLocalization(object):
+class BoardLocalization(object):
 
     def __init__(self, board, calib_data, mrklen, 
-                aruco_dict, name='cam1_pose', camname='camera_1'):
+                aruco_dict, bname = 'tray', name='cam1_tray', camname='camera_1'):
         
         # Initialize Set of Params:
         
@@ -37,7 +37,7 @@ class TrayLocalization(object):
         
         # Publishers
         self.posePub = rospy.Publisher('/'+self.name+'_estimation', PoseStamped, queue_size=10)  # Pose Publisher object 
-        self.processedImagePub = rospy.Publisher('/aruco_image_'+self.camname, Image, queue_size=10) # Annotated image publisher
+        self.processedImagePub = rospy.Publisher('/aruco_image_'+bname+'_'+self.camname, Image, queue_size=10) # Annotated image publisher
         
         # Tracking params
         self.recursiveTracking = True
@@ -124,41 +124,41 @@ def main():
     rospy.loginfo('pose_estimation is initialized!')
 
     
-    tloc1 = TrayLocalization(
+    tloc1 = BoardLocalization(
         board=conf.board, 
         calib_data=conf.angetube_calibration, 
         mrklen=conf.mrklen,
         aruco_dict=conf.aruco_dict, 
-        name='cam1_pose',
+        name='cam1_tray_pose',
         camname='camera_1'
         )
 
     rospy.Subscriber('/camera_1', Image,callback=tloc1.callback)
 
 
-    tloc2 = TrayLocalization(
-        board=conf.board, 
-        calib_data=conf.logitech_t1_calibration, 
-        mrklen=conf.mrklen,
-        aruco_dict=conf.aruco_dict, 
-        name='cam2_pose',
-        camname='camera_2'
-        )
+    # tloc2 = BoardLocalization(
+    #     board=conf.board, 
+    #     calib_data=conf.logitech_t1_calibration, 
+    #     mrklen=conf.mrklen,
+    #     aruco_dict=conf.aruco_dict, 
+    #     name='cam2_pose',
+    #     camname='camera_2'
+    #     )
 
-    rospy.Subscriber('/camera_2', Image, callback=tloc2.callback)
+    # rospy.Subscriber('/camera_2', Image, callback=tloc2.callback)
 
 
 
-    tloc3 = TrayLocalization(
-        board=conf.board, 
-        calib_data=conf.logitech_t2_calibration, 
-        mrklen=conf.mrklen,
-        aruco_dict=conf.aruco_dict, 
-        name='cam3_pose',
-        camname='camera_3'
-        )
+    # tloc3 = BoardLocalization(
+    #     board=conf.board, 
+    #     calib_data=conf.logitech_t2_calibration, 
+    #     mrklen=conf.mrklen,
+    #     aruco_dict=conf.aruco_dict, 
+    #     name='cam3_pose',
+    #     camname='camera_3'
+    #     )
 
-    rospy.Subscriber('/camera_3', Image, callback=tloc3.callback)
+    # rospy.Subscriber('/camera_3', Image, callback=tloc3.callback)
 
 
     rospy.spin()

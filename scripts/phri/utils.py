@@ -106,6 +106,18 @@ def g_from_pose(pose):
 	g[abs(g)<eps] = 0.0
 	return g
 
+
+def pose_from_g(g):
+	pos = g[:3.3].flatten()
+	quat = tfs.quaternion_from_matrix(g)
+
+	pose = {
+		'position':pos,
+		'orientation': quat
+	}
+
+	return pose
+
 def expcoord(mat):
 	
 	
