@@ -1,8 +1,3 @@
 data/rosbag
 data/pose_estimation/calibration/logitech_t1/images
-data/pose_estimation/calibration/angetube/images
-<<<<<<< HEAD
 
-=======
-data/pose_estimation/calibration/logitech_t2/images
->>>>>>> d96646015c5ea29542a883da339c4910e4386740
