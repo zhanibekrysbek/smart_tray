@@ -8,6 +8,8 @@ import conf
 from phri import utils
 
 from PoseEstimation import TrayInGRF
+from geometry_msgs.msg import PoseStamped
+
 
 
 def main():
@@ -16,12 +18,13 @@ def main():
     rospy.loginfo('process_tray_location!')
 
 
-    t1grf = TrayInGRF(
+    t3grf = TrayInGRF(
         cam2grf=conf.cam3togrf,
         topic='/cam3_tray_grf',
         tray_est_top='/cam3_tray_pose_estimation'
     )
 
+    rospy.Subscriber('/cam3_tray_pose_estimation', PoseStamped, t3grf.callback)
 
     rospy.spin()
 

@@ -62,21 +62,32 @@ class trayDataParser(object):
 					resdf = self.parse_pose_topic(msgs, total_msgs=cnts)
 				elif topic_type=='images':
 					resdf = self.parse_img_topic(msgs, topic, total_msgs=cnts)
+				elif topic_type == 'camera':
+					resdf = self.parse_image_files(topic)
+
+					message_count = resdf.seq.nunique()
+					duration = resdf.time_stamp.iloc[-1]-resdf.time_stamp.iloc[0]
+					message_type = 'sensor_msgs/Image'
+					freq = message_count/duration
+					tempinfo = pd.DataFrame([['/'+topic, message_count, freq,
+                                            message_type]], columns=res['summary'].columns[:-2])
+					res['summary'] = res['summary'].append(tempinfo, sort=False, ignore_index=True)
 
 				res[topic] = resdf
 				
-
 		meta_data_name = os.path.join(self.destination, self.base_name + '_meta_data.pkl')
 		pickle.dump(res, open(meta_data_name,'w'))
 
 		return
 
+
+
 	def data_summary(self):
 		descr = self.bag.get_type_and_topic_info()[1]
 
 		topics = []
-		for temp in self.topiclist.values():
-			topics+=temp
+		# for temp in self.topiclist.values():
+		# 	topics+=temp
 
 		res = pd.DataFrame()
 
@@ -84,12 +95,13 @@ class trayDataParser(object):
 		freqs = []
 		counts = []
 		
-		for topic in topics:
+		for topic in descr.keys():
 			des = descr[topic]
 
 			msg_types.append(des.msg_type)
 			freqs.append(des.frequency)
 			counts.append(des.message_count)
+			topics.append(topic)
 		
 		res['topic_name'] = topics
 		res['message_count'] = counts
@@ -101,7 +113,49 @@ class trayDataParser(object):
 		print '\n==================================== ROS bag Info ======================================\n'
 		print res
 		print '\n========================================================================================\n'
+		
 		self.summary = res
+		return res
+
+	def parse_image_files(self, topic):
+		res = pd.DataFrame()
+
+		seqs = []
+		timestamps = []
+		frame_ids = []
+		impaths = []
+
+		basedir = os.path.join(self.destination, topic, 'images')
+		imnames = np.array(os.listdir(basedir))
+
+		order = np.argsort([int(p.split("_")[-3]) for p in imnames])
+		imnames = imnames[order]
+
+		for im in tqdm(imnames):
+			if im.endswith('.png'):
+				vals = im.split('_')
+				if 'angetube' in im:
+					frame_id = vals[0]+'_'+vals[1]
+					seq = int(vals[2])
+					sec = int(vals[3])
+					nsec = int(vals[-1].split('.')[0])
+				else: 
+					frame_id = vals[0]+'_'+vals[1] + '_'+vals[2]
+					seq = int(vals[3])
+					sec = int(vals[4])
+					nsec = int(vals[-1].split('.')[0])
+
+				frame_ids.append(frame_id)
+				seqs.append(seq)
+				impaths.append(os.path.join(basedir,im))
+				timestamps.append(sec+nsec*1e-9)
+
+		res['seq'] = seqs
+		res['time_stamp'] = timestamps
+		res['frame_id'] = frame_ids
+		res['image_path'] = impaths
+		res.index = np.arange(len(seqs))
+
 		return res
 
 	def parse_img_topic(self, msgs, topic_name, total_msgs):
@@ -257,8 +311,11 @@ def main():
 
 	topiclist = {'rft': ['/RFT_FORCE', '/RFT_FORCE_2'],
 				 'imu': ['/imu_data'],
-				 'pose':['/cam1_pose_estimation'],
-				 'images':['/camera_1', '/aruco_cam1_pose']}
+				 'pose': ['/cam1_tray_pose_estimation', '/cam2_tray_pose_estimation', '/cam3_tray_pose_estimation',
+              			'/cam1_tray_grf', '/cam2_tray_grf', '/cam3_tray_grf'],
+				 'camera': ['camera_1', 'camera_2', 'camera_3']
+				}
+				#  'images':['/camera_1', '/aruco_cam1_pose']}
 
 	# import pdb; pdb.set_trace()
 

@@ -4,12 +4,11 @@ import rospy
 import sys
 sys.path.insert(1, '/home/zhanibek/catkin_ws/src/smart_tray/scripts')
 
-
 import conf
 from phri import utils
 
 from PoseEstimation import TrayInGRF
-
+from geometry_msgs.msg import PoseStamped
 
 
 def main():
@@ -24,6 +23,7 @@ def main():
         tray_est_top='/cam1_tray_pose_estimation' 
         )
 
+    rospy.Subscriber('/cam1_tray_pose_estimation', PoseStamped, t1grf.callback)
 
     rospy.spin()
 

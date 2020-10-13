@@ -77,6 +77,7 @@ class smart_tray(object):
 		rospy.loginfo('Ending the program!')
 		self.rft_srv_1(12,0,0,0)
 		self.rft_srv_2(12,0,0,0)
+		rospy.sleep(1)
 		self.imu_srv('stop')
 		self.camera_1_srv('stop')
 		self.camera_2_srv('stop')

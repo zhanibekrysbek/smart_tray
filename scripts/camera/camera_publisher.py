@@ -3,6 +3,7 @@
 import rospy
 import cv2
 from cv_bridge import CvBridge as bridge
+import os
 
 '''
  Camera object used across smart_tray package that is responsible acquiring images and publishing in specified topic.
@@ -21,6 +22,13 @@ class Camera(object):
         self.height = height
         self.width = width
 
+
+        # self.destination = '/home/zhanibek/catkin_ws/src/smart_tray/data/rosbag/test/trial_2_im_rec/camera_'+str(program_id)
+        # if not os.path.exists(self.destination):
+        #     os.makedirs(self.destination)
+
+
+
     # Service callback meant to be referenced by parent thread 
     def service_callback(self, req):
         rospy.loginfo('%s service is called: %s', self.name, req.req)
@@ -29,13 +37,13 @@ class Camera(object):
             self.state = True
 
             rospy.loginfo('%s: Broadcasting images ', self.name)
-            return 'Broadcasting images from Camera_1 '
+            return 'Broadcasting images from ' + self.model
 
         elif req.req == 'stop':
             self.state = False
             self.cap.release()
             rospy.loginfo('%s: going silent', self.name)
-            return 'Going silent Camera_1'
+            return 'Going silent ' + self.model
 
         else:
             return 'Unknown command! Use either "start" -or- "stop" '
@@ -55,11 +63,22 @@ class Camera(object):
             if self.state:
                 ret, frame = self.cap.read()
                 if ret==True:
+
+                    # tt = rospy.get_rostime()
+                    # secs, nsecs = tt.secs, tt.nsecs
+                    # frame_id = self.model + '_' + str(seq)
+                    # imname = frame_id.split('/')[-1] + '_' + str(seq) + '_' + str(secs) + '_' + str(nsecs) + '.png'
+                    # impath = os.path.join(self.destination, imname)
+
+                    # cv2.imwrite(impath, frame)
+
+
+
                     img_msg = bridge().cv2_to_imgmsg(frame,"bgr8")
                     img_msg.header.stamp = rospy.get_rostime()
                     img_msg.header.seq = seq
                     img_msg.header.frame_id = self.model + '_' + str(seq)
-                    pub.publish(img_msg)                
+                    pub.publish(img_msg)      
                     
                     seq+=1
 

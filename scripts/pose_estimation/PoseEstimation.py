@@ -23,7 +23,7 @@ from phri import utils
 class BoardLocalization(object):
 
     def __init__(self, board, calib_data, mrklen, 
-                aruco_dict, bname = 'tray', name='cam1_tray', camname='camera_1'):
+                aruco_dict, bname = 'tray', name='cam1_tray', camname='camera_1', online = True, recursive = True):
         
         # Initialize Set of Params:
         
@@ -38,12 +38,14 @@ class BoardLocalization(object):
         self.camera_matrix = calib_data['camera_matrix']
         self.dist_coeffs = calib_data['dist_coeffs']
         
-        # Publishers
-        self.posePub = rospy.Publisher('/'+self.name+'_estimation', PoseStamped, queue_size=10)  # Pose Publisher object 
-        self.processedImagePub = rospy.Publisher('/aruco_image_'+bname+'_'+self.camname, Image, queue_size=10) # Annotated image publisher
+        self.online = online
+        if not self.online:
+            # Publishers
+            self.posePub = rospy.Publisher('/'+self.name+'_estimation', PoseStamped, queue_size=10)  # Pose Publisher object 
+            self.processedImagePub = rospy.Publisher('/aruco_image_'+bname+'_'+self.camname, Image, queue_size=10) # Annotated image publisher
         
         # Tracking params
-        self.recursiveTracking = True
+        self.recursiveTracking = recursive
         self.rvec_prev = None
         self.tvec_prev = None        
 
@@ -67,6 +69,11 @@ class BoardLocalization(object):
 
         frame_msg = bridge().cv2_to_imgmsg(frame,'bgr8')
         frame_msg.header = data.header
+        # frame_msg.header.seq = data.header.seq
+        # frame_msg.header.stamp.secs = data.header.stamp.secs
+        # frame_msg.header.stamp.nsecs = data.header.stamp.nsecs
+        # frame_msg.header.frame_id = data.header.frame_id
+
         self.posePub.publish(trayPose)
         self.processedImagePub.publish(frame_msg)
 
@@ -123,14 +130,9 @@ class BoardLocalization(object):
 
 
 
-
-
-
-
-
 class TrayInGRF(object):
 
-    def __init__(self, cam2grf, topic, tray_est_top='/cam1_tray_pose_estimation'):
+    def __init__(self, cam2grf, topic, tray_est_top='/cam1_tray_pose_estimation', online = True):
 
         # Initialize Set of Params:
 
@@ -139,11 +141,13 @@ class TrayInGRF(object):
         self.tray_est_top = tray_est_top
         self.cam2grf = cam2grf
 
+        self.online = online
+        if self.online:
         # Publishers
         self.pub = rospy.Publisher(
             self.topic, PoseStamped, queue_size=10)  # Pose Publisher object
 
-        rospy.Subscriber(self.tray_est_top, PoseStamped, self.callback)
+        
 
     def callback(self, data):
         '''
@@ -168,6 +172,9 @@ class TrayInGRF(object):
         pose.pose.orientation.x, pose.pose.orientation.y, pose.pose.orientation.z, pose.pose.orientation.w = grf2tray['orientation'].flatten(
         )
 
+        if (cam2tray['position']==0.0).all() and (cam2tray['orientation']==0.0).all():
+            return
+
         self.pub.publish(pose)
 
     def perform_transformation(self, cam2grf_pose, cam2tray_pose):
@@ -178,6 +185,9 @@ class TrayInGRF(object):
         grf2tray = utils.pose_from_g(Ggrf_tray)
 
         return grf2tray
+
+
+
 
 
 

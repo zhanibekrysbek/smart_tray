@@ -14,7 +14,7 @@ Angetube camera.
 '''
 
 program_id = 1
-camera_id = 3
+camera_id = 1
 
 def main():
 
