@@ -75,12 +75,10 @@ class trayDataParser(object):
 
 				res[topic] = resdf
 				
-		meta_data_name = os.path.join(self.destination, self.base_name + '_meta_data.pkl')
+		meta_data_name = os.path.join(self.destination, self.base_name + '_meta_data_force_only.pkl')
 		pickle.dump(res, open(meta_data_name,'w'))
 
 		return
-
-
 
 	def data_summary(self):
 		descr = self.bag.get_type_and_topic_info()[1]
@@ -278,7 +276,7 @@ class trayDataParser(object):
 			timestamps.append(t)
 			frame_ids.append(frame_id)
 			forces.append(np.array([ms.wrench.force.x, ms.wrench.force.y, ms.wrench.force.z]))
-			torques.append(np.array([ms.wrench.torque.x, ms.wrench.force.y, ms.wrench.force.z]))
+			torques.append(np.array([ms.wrench.torque.x, ms.wrench.torque.y, ms.wrench.torque.z]))
 
 
 		res['seq'] = seqs
@@ -315,10 +313,13 @@ def main():
               			'/cam1_tray_grf', '/cam2_tray_grf', '/cam3_tray_grf'],
 				 'camera': ['camera_1', 'camera_2', 'camera_3']
 				}
+
 				#  'images':['/camera_1', '/aruco_cam1_pose']}
 
 	# import pdb; pdb.set_trace()
 
+	topiclist = {'rft': ['/RFT_FORCE', '/RFT_FORCE_2'],
+              }
 
 	print('Received argument: %s'%args.fname)
 	

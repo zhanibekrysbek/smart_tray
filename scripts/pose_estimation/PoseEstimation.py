@@ -144,7 +144,7 @@ class TrayInGRF(object):
         self.online = online
         if self.online:
         # Publishers
-        self.pub = rospy.Publisher(
+            self.pub = rospy.Publisher(
             self.topic, PoseStamped, queue_size=10)  # Pose Publisher object
 
         
@@ -166,20 +166,18 @@ class TrayInGRF(object):
             'orientation': np.array([data.pose.orientation.x, data.pose.orientation.y, data.pose.orientation.z, data.pose.orientation.w])
         }
 
-        grf2tray = self.perform_transformation(self.cam2grf, cam2tray)
-        pose.pose.position.x, pose.pose.position.y, pose.pose.position.z = grf2tray['position'].flatten(
-        )
-        pose.pose.orientation.x, pose.pose.orientation.y, pose.pose.orientation.z, pose.pose.orientation.w = grf2tray['orientation'].flatten(
-        )
+        grf2tray = self.perform_transformation( cam2tray)
+        pose.pose.position.x, pose.pose.position.y, pose.pose.position.z = grf2tray['position'].flatten()
+        pose.pose.orientation.x, pose.pose.orientation.y, pose.pose.orientation.z, pose.pose.orientation.w = grf2tray['orientation'].flatten()
 
         if (cam2tray['position']==0.0).all() and (cam2tray['orientation']==0.0).all():
             return
 
         self.pub.publish(pose)
 
-    def perform_transformation(self, cam2grf_pose, cam2tray_pose):
+    def perform_transformation(self, cam2tray_pose):
 
-        Gc_grf = utils.g_from_pose(cam2grf_pose)
+        Gc_grf = utils.g_from_pose(self.cam2grf)
         Gc_tray = utils.g_from_pose(cam2tray_pose)
         Ggrf_tray = np.matmul(utils.inverse(Gc_grf), Gc_tray)
         grf2tray = utils.pose_from_g(Ggrf_tray)
