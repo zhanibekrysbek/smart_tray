@@ -18,6 +18,16 @@ from sensor_msgs.msg import Image
 from geometry_msgs.msg import PoseStamped, WrenchStamped
 
 
+meta_data_paths = [
+    '/home/zhanibek/catkin_ws/src/smart_tray/data/rosbag/koh_sanket/trial_0/koh_sanket_trial_0_2020-10-11-20-48-27_meta_data_aruco_offline.pkl',
+    '/home/zhanibek/catkin_ws/src/smart_tray/data/rosbag/koh_zhanibek/trial_0/koh_zhanibek_trial_0_2020-10-11-21-19-07_meta_data_aruco_offline.pkl',
+    '/home/zhanibek/catkin_ws/src/smart_tray/data/rosbag/sanket_vignesh/trial_0/trial_0_2020-10-12-14-47-43_meta_data_aruco_offline.pkl',
+    '/home/zhanibek/catkin_ws/src/smart_tray/data/rosbag/sanket_vignesh/trial_1/trial_1_2020-10-12-14-51-53_meta_data_aruco_offline.pkl',
+    '/home/zhanibek/catkin_ws/src/smart_tray/data/rosbag/zhanibek_sanket/trial_0/trial_0_2020-10-12-15-02-32_meta_data_aruco_offline.pkl',
+    '/home/zhanibek/catkin_ws/src/smart_tray/data/rosbag/zhanibek_vignesh/trial_0/trial_0_2020-10-12-14-57-11_meta_data_aruco_offline.pkl'
+]
+
+
 class trayDataParser(object):
 
 
@@ -40,11 +50,11 @@ class trayDataParser(object):
 
 
 
-	def process_rosbag_file(self):
+	def process_rosbag_file(self, res={}):
 
 		print(' <<< Processing file: %s  >>>'%self.fname)
 
-		res = {}
+		# res = {}
 		
 		res['summary'] = self.data_summary()
 		for topic_type in self.topiclist.keys():
@@ -75,8 +85,11 @@ class trayDataParser(object):
 
 				res[topic] = resdf
 				
-		meta_data_name = os.path.join(self.destination, self.base_name + '_meta_data_force_only.pkl')
-		pickle.dump(res, open(meta_data_name,'w'))
+		meta_data_name = os.path.join(self.destination, self.base_name + '_meta_data_v2.pkl')
+		
+		print '\nSaving results to: ', os.path.basename(meta_data_name)
+		
+		pickle.dump(res, open(meta_data_name,'w'), protocol=2)
 
 		return
 
@@ -304,6 +317,11 @@ def main():
 		help='path to save the results.'
 	)
 
+	parser.add_argument(
+            '-w', '--overwrite this file', dest='old_ind', required=False,
+            help='index of meta_data_paths'
+        )
+
 	args = parser.parse_args(sys.argv[1:])
 
 
@@ -325,9 +343,17 @@ def main():
 	
 	if args.destination is None:
 		args.destination = os.getcwd()
+	
+	if args.old_ind is not None:
+		path = meta_data_paths[int(args.old_ind)]
+		print 'Loading ', os.path.basename(path)
+		old_res = pickle.load(open(path))
+		
+	else:
+		old_res={}
 
 	parser = trayDataParser(args.fname, args.destination, topiclist)
-	parser.process_rosbag_file()
+	parser.process_rosbag_file(old_res)
 
 	print('Done!')
 
