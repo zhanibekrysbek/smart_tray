@@ -72,6 +72,22 @@ def g_from_qv(quat,vec):
 	g = np.matmul(trmat,rot)
 	return g
 
+# axis angle representation from quaternion
+def axis_angle_from_quat(quat, zup):
+
+	angle = 2 * np.arccos(quat[-1])
+	direc = np.zeros(3)
+	direc = quat[:3] / np.sqrt(1-quat[-1]**2)
+
+	if zup:
+		zs = np.sign(direc)[-1]
+		direc *= zs
+		angle *= zs
+
+	return angle, direc
+
+
+
 def quat_from_R(R):
     '''
     @param R: 3x3 np array
@@ -107,13 +123,20 @@ def g_from_pose(pose):
 	return g
 
 
-def pose_from_g(g):
+def pose_from_g(g, rotation='quaternion', zup=False):
+
 	pos = g[:3,3].flatten()
-	quat = tfs.quaternion_from_matrix(g)
+
+	
+	orient = tfs.quaternion_from_matrix(g)
+
+	if rotation == 'axis-angle':
+		angle, direc = axis_angle_from_quat(orient, zup)
+		orient = np.hstack((direc, angle))
 
 	pose = {
 		'position':pos,
-		'orientation': quat
+		'orientation': orient
 	}
 
 	return pose
@@ -125,7 +148,7 @@ def expcoord(mat):
 		mat = np.append(np.append(mat, [[0,0,0]], axis=0), 
 			[[0], [0], [0], [1]], axis=1)
 
-	R = mat[0:3,0:3];
+	R = mat[0:3,0:3]
 	angle, direc, point = tfs.rotation_from_matrix(mat)
 	p = tfs.translation_from_matrix(mat)
 
