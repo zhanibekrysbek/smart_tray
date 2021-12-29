@@ -74,6 +74,10 @@ def g_from_qv(quat,vec):
 
 # axis angle representation from quaternion
 def axis_angle_from_quat(quat, zup):
+	'''
+	@param quat:  4dimentional Quaternion
+	@param zup:   bool. Whether to enforce positive Z direction
+	'''
 
 	angle = 2 * np.arccos(quat[-1])
 	direc = np.zeros(3)
@@ -86,7 +90,8 @@ def axis_angle_from_quat(quat, zup):
 
 	return angle, direc
 
-
+def rotation_matrix(angle, axis, point=None):
+	return tfs.rotation_matrix(angle, axis, point)
 
 def quat_from_R(R):
     '''

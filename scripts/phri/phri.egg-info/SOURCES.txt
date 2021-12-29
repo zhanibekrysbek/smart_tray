@@ -1,0 +1,5 @@
+setup.py
+phri.egg-info/PKG-INFO
+phri.egg-info/SOURCES.txt
+phri.egg-info/dependency_links.txt
+phri.egg-info/top_level.txt

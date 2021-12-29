@@ -27,6 +27,9 @@ meta_data_paths = [
     '/home/zhanibek/catkin_ws/src/smart_tray/data/rosbag/zhanibek_vignesh/trial_0/trial_0_2020-10-12-14-57-11_meta_data_aruco_offline.pkl'
 ]
 
+imu_calibration_data = [
+	'/home/zhanibek/catkin_ws/src/smart_tray/data/rosbag/imu_calibration/imu_calibration_2020-11-02-14-58-29.bag']
+
 
 class trayDataParser(object):
 
@@ -318,26 +321,30 @@ def main():
 	)
 
 	parser.add_argument(
-            '-w', '--overwrite this file', dest='old_ind', required=False,
-            help='index of meta_data_paths'
+		'-w', '--overwrite this file', dest='old_ind', required=False,
+		help='index of meta_data_paths'
         )
 
 	args = parser.parse_args(sys.argv[1:])
 
 
-	topiclist = {'rft': ['/RFT_FORCE', '/RFT_FORCE_2'],
-				 'imu': ['/imu_data'],
-				 'pose': ['/cam1_tray_pose_estimation', '/cam2_tray_pose_estimation', '/cam3_tray_pose_estimation',
-              			'/cam1_tray_grf', '/cam2_tray_grf', '/cam3_tray_grf'],
-				 'camera': ['camera_1', 'camera_2', 'camera_3']
-				}
+	# topiclist = {'rft': ['/RFT_FORCE', '/RFT_FORCE_2'],
+	# 			 'imu': ['/imu_data'],
+	# 			 'pose': ['/cam1_tray_pose_estimation', '/cam2_tray_pose_estimation', '/cam3_tray_pose_estimation',
+    #           			'/cam1_tray_grf', '/cam2_tray_grf', '/cam3_tray_grf'],
+	# 			 'camera': ['camera_1', 'camera_2', 'camera_3']
+	# 			}
+
+	topiclist = {
+              'imu': ['/imu_data']
+              }
 
 				#  'images':['/camera_1', '/aruco_cam1_pose']}
 
 	# import pdb; pdb.set_trace()
 
-	topiclist = {'rft': ['/RFT_FORCE', '/RFT_FORCE_2'],
-              }
+	# topiclist = {'rft': ['/RFT_FORCE', '/RFT_FORCE_2'],
+    #           }
 
 	print('Received argument: %s'%args.fname)
 	
